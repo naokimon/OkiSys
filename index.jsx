@@ -78,13 +78,28 @@ const CommandInput = () => {
 
 const SystemInfo = () => {
     const cpus = os.cpus();
-    const totalRAM = (os.totalmem() / 1e9).toFixed(1);
     const [storage, setStorage] = useState(null);
-    const [ram, setRam] = useState(null);
+    const [ramInfo, setRamInfo] = useState(null);
+    const [gpu, setGpu] = useState(null);
 
     useEffect(() => {
-        let ram = (os.freemem() / 1e9).toFixed(1);
-        setRam(ram); // set RAM
+        si.graphics().then(data => {
+            const controller = data.controllers[0];
+            setGpu({
+                model: controller.model,
+                vram: (controller.vram / 1024).toFixed(1),
+                driver: controller.driverVersion === undefined ? "None" : controller.driverVersion,
+            }); 
+        }, []); // set gpu dict
+
+        si.memLayout().then(mem => {
+            setRamInfo({
+                memory: (os.freemem() / 1e9).toFixed(1),
+                type: mem[0].type,
+                speed: mem[0].clockSpeed,
+                slots: mem.length
+            }); // set ram dict
+        }, []);
 
         si.fsSize().then(drives => {
             const cDrive = drives.find(d => d.fs === "C:");
@@ -101,8 +116,13 @@ const SystemInfo = () => {
                 {[
                     { label: "CPU", value: cpus[0].model },
                     { label: "CPU Cores", value: `${cpus.length} cores` },
-                    { label: "Total RAM", value: `${totalRAM} GB` },
-                    { label: "Free RAM", value: `${ram} GB` },
+                    { label: "GPU", value: gpu?.model ?? "Loading..." },
+                    { label: "GPU VRAM", value: `${gpu?.vram} GB` ?? "Loading..." },
+                    { label: "GPU Driver", value: `${gpu?.driver}` ?? "Loading..." },
+                    { label: "Total RAM", value: `${ramInfo?.memory ?? "Loading..."} GB` },
+                    { label: "RAM Type", value: `${ramInfo?.type ?? "Loading..."}` },
+                    { label: "RAM Speed", value: ramInfo ? `${ramInfo.speed} MHz` : "Loading..." },
+                    { label: "RAM Slots", value: ramInfo ? `${ramInfo.slots} slots used` : "Loading..."},
                     { label: "Storage", value: storage ?? "Loading..." },
                     { label: "OS", value: `${os.type()} ${os.release()}` },
                     { label: "Host", value: os.hostname() },
@@ -120,9 +140,10 @@ const SystemInfo = () => {
 
 const Dashboard = () => (
     <Box flexDirection="column" height={process.stdout.rows} width={process.stdout.columns}>
-        <Box flexGrow={1} height={process.stdout.rows / 0.95} borderStyle="round" borderColor={colors.brandDark} paddingY={1} paddingX={2}>
+        <Box flexGrow={1} height={process.stdout.rows / 0.95} paddingY={1} paddingX={2}>
             <Box flexShrink={0} borderStyle="round" borderColor={colors.border} alignSelf="flex-start">
                 <SystemInfo />
+
             </Box>
         </Box>
         <Box height={process.stdout.rows * 0.05} width={process.stdout.columns} borderStyle="round" borderColor={colors.border} paddingY={1.5} paddingX={2}>
