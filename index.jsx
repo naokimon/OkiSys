@@ -67,7 +67,7 @@ const CommandInput = () => {
     const [value, setValue] = useState('');
 
     const handleSubmit = () => {
-        const cmd = value.trim();
+        const cmd = value.trim().toLowerCase();
         runCommand(cmd);
     }
 
