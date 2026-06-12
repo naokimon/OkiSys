@@ -1,12 +1,17 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors } from "../index";
 import TextInput from 'ink-text-input';
-import { Text, Box } from "ink";
+import { Text, Box, useInput } from "ink";
 import open from 'open';
 import useSize from "../index";
+import { writeFileSync, existsSync, appendFileSync, readFileSync } from 'fs';
 
 const runCommand = async (rawCMD) => {
+    if (!existsSync("commandlog.txt")) {
+        writeFileSync('commandlog.txt', '');
+    }
+    appendFileSync('commandlog.txt', `\n${rawCMD}`);
     const i = rawCMD.indexOf(" ");
     const cmd = i === -1 ? rawCMD : rawCMD.slice(0, i);
     const args = i === -1 ? [] : rawCMD.slice(i + 1).split(" ");
@@ -52,6 +57,8 @@ export const CommandInput = () => {
     const [value, setValue] = useState('');
     const [error, setError] = useState();
     const [resultColor, setResultColor] = useState(null);
+    const [commandList, setCommandList] = useState([]);
+    const [historyIndex, setHistoryIndex] = useState(0);
 
     const handleSubmit = async () => {
         const rawCMD = value.trim().toLowerCase();
@@ -60,6 +67,32 @@ export const CommandInput = () => {
         await setResultColor(result[1]);
         setValue('');
     };
+
+    useEffect(() => {
+        if (existsSync('commandlog.txt')) {
+            const lines = readFileSync('commandlog.txt', 'utf-8').split('\n').filter(Boolean);
+            setCommandList(lines);
+            setHistoryIndex(lines.length);
+        }
+    }, []);
+
+    useInput((input, key) => {
+        if (commandList.length === 0) return;
+
+        if (key.upArrow) {
+            const i = Math.max(0, historyIndex - 1);
+            setHistoryIndex(i);
+            setValue(commandList[i]);
+            if (commandList[i] !== undefined) setValue(commandList[i]);
+            else setValue('');
+        } else if (key.downArrow) {
+            const i = Math.min(commandList.length - 1, historyIndex + 1);
+            setHistoryIndex(i);
+            setValue(commandList[i]);
+            if (commandList[i] !== undefined) setValue(commandList[i]);
+            else setValue('');
+        }
+    });
 
     const size = useSize();
 
