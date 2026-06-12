@@ -82,28 +82,20 @@ export const CommandInput = () => {
         if (key.upArrow) {
             const i = Math.max(0, historyIndex - 1);
             setHistoryIndex(i);
-            setValue(commandList[i]);
-            if (commandList[i] !== undefined) setValue(commandList[i]);
-            else setValue('');
+            setValue(commandList[i] ?? '');
         } else if (key.downArrow) {
             const i = Math.min(commandList.length - 1, historyIndex + 1);
             setHistoryIndex(i);
-            setValue(commandList[i]);
-            if (commandList[i] !== undefined) setValue(commandList[i]);
-            else setValue('');
+            setValue(commandList[i] ?? '');
         }
     });
 
     const size = useSize();
 
     return (
-        <Box flexDirection="column">
-            <Box paddingX={2}>
-                <Text color={resultColor}>{error}</Text>
-            </Box>
-            <Box width={size.cols} borderStyle="round" borderColor={colors.border} paddingY={1.5} paddingX={2}>
-                <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={setValue} onSubmit={handleSubmit} placeholder="Enter a command..." />
-            </Box>
+        <Box width={size.cols} borderStyle="round" borderColor={colors.border} paddingY={1} paddingX={2} flexDirection="row" gap={2}>
+            {error && <Text color={resultColor}>{error}  |</Text>}
+            <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={setValue} onSubmit={handleSubmit} placeholder="Enter a command..." />
         </Box>
     )
 };

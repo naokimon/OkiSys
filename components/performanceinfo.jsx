@@ -12,17 +12,18 @@ export const PerformanceInfo = () => {
 
 
     useEffect(() => {
-        const refresh = setInterval(() => {
+        const poll = () => {
             si.mem().then(data => {
                 if (!data) return;
                 setRamUsage((data.used / data.total * 100).toFixed(0));
             });
             si.currentLoad().then(data => setCpuUsage(data.currentLoad.toFixed(0)));
             si.graphics().then(data => setGpuUsage(data.controllers[0].utilizationGpu ?? 0));
-        }, refreshRate);
-
+        };
+        poll();
+        const refresh = setInterval(poll, refreshRate);
         return () => clearInterval(refresh);
-    });
+    }, []);
 
     const bar = (pct, width = 25) => {
         const filled = Math.round((pct / 100) * width);

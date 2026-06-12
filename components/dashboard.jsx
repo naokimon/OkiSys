@@ -5,23 +5,29 @@ import { PerformanceInfo } from "./performanceinfo";
 import { SystemInfo } from "./systemspecs";
 import { Box } from "ink";
 import { CommandInput } from './commandinput'
-import { CommandList } from './commandlist'
+import { CommandList } from './commandlist';
+import { NetworkInfo } from './networkinfo';
 import useSize from "../index";
+
+const Panel = ({ children }) => (
+    <Box flexShrink={0} borderStyle="round" borderColor={colors.border} alignSelf="stretch">
+        {children}
+    </Box>
+);
 
 export const Dashboard = () => {
     const size = useSize();
 
     return (
         <Box flexDirection="column" height={size.rows} width={size.cols}>
-            <Box flexGrow={1} height={size.rows / 0.95} paddingY={1} paddingX={2} flexWrap="wrap">
-                <Box flexShrink={0} borderStyle="round" borderColor={colors.border} alignSelf="flex-start">
-                    <SystemInfo />
+            <Box flexDirection="column" gap={1}>
+                <Box flexDirection="row" gap={1}>
+                    <Panel><SystemInfo /></Panel>
+                    <Panel><PerformanceInfo /></Panel>
+                    <Panel><CommandList /></Panel>
                 </Box>
-                <Box flexShrink={0} borderStyle="round" borderColor={colors.border} alignSelf="flex-start">
-                    <PerformanceInfo />
-                </Box>
-                <Box flexShrink={0} borderStyle="round" borderColor={colors.border} alignSelf="flex-start">
-                    <CommandList />
+                <Box flexDirection="row" gap={1}>
+                    <Panel><NetworkInfo /></Panel>
                 </Box>
             </Box>
             <CommandInput />
