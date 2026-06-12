@@ -8,10 +8,6 @@ import useSize from "../index";
 import { writeFileSync, existsSync, appendFileSync, readFileSync } from 'fs';
 
 const runCommand = async (rawCMD) => {
-    if (!existsSync("commandlog.txt")) {
-        writeFileSync('commandlog.txt', '');
-    }
-    appendFileSync('commandlog.txt', `\n${rawCMD}`);
     const i = rawCMD.indexOf(" ");
     const cmd = i === -1 ? rawCMD : rawCMD.slice(0, i);
     const args = i === -1 ? [] : rawCMD.slice(i + 1).split(" ");
@@ -62,19 +58,22 @@ export const CommandInput = () => {
 
     const handleSubmit = async () => {
         const rawCMD = value.trim().toLowerCase();
+
+        if (!existsSync("commandlog.txt")) {
+            writeFileSync('commandlog.txt', '');
+        } else {
+            appendFileSync('commandlog.txt', `\n${rawCMD}`);
+        }
+
+        const lines = readFileSync('commandlog.txt', 'utf-8').split('\n').filter(Boolean);
+        setCommandList(lines);
+        setHistoryIndex(lines.length);
+
         const result = await runCommand(rawCMD);
         setError(result[0]);
         setResultColor(result[1]);
         setValue('');
     };
-
-    useEffect(() => {
-        if (existsSync('commandlog.txt')) {
-            const lines = readFileSync('commandlog.txt', 'utf-8').split('\n').filter(Boolean);
-            setCommandList(lines);
-            setHistoryIndex(lines.length);
-        }
-    }, []);
 
     useInput((input, key) => {
         if (commandList.length === 0) return;
