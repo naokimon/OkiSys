@@ -3,33 +3,8 @@ import { useState, useEffect } from 'react';
 import { colors } from "../index";
 import { PerformanceInfo } from "./performanceinfo";
 import { SystemInfo } from "./systemspecs";
-import { Box, Text } from "ink";
-import TextInput from 'ink-text-input';
-
-function runCommand(cmd) {
-    switch (cmd) {
-        case "exit":
-            console.clear();
-            process.exit(0);
-            break;
-        default:
-            break;
-    }
-}
-
-const CommandInput = () => {
-    const [value, setValue] = useState('');
-
-    const handleSubmit = () => {
-        const cmd = value.trim().toLowerCase();
-        runCommand(cmd);
-        setValue('');
-    }
-
-    return (
-        <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={setValue} onSubmit={handleSubmit} placeholder="Enter a command..." />
-    )
-}
+import { Box } from "ink";
+import { CommandInput } from './commandinput'
 
 export const Dashboard = () => (
     <Box flexDirection="column" height={process.stdout.rows} width={process.stdout.columns}>
@@ -41,8 +16,6 @@ export const Dashboard = () => (
                 <PerformanceInfo />
             </Box>
         </Box>
-        <Box height={process.stdout.rows * 0.05} width={process.stdout.columns} borderStyle="round" borderColor={colors.border} paddingY={1.5} paddingX={2}>
-            <CommandInput />
-        </Box>
+        <CommandInput />
     </Box>
 )

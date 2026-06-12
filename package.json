@@ -19,6 +19,7 @@
     "ink-text-input": "^6.0.0",
     "inquirer": "^14.0.2",
     "nanospinner": "^1.2.2",
+    "open": "^11.0.0",
     "systeminformation": "^5.31.7"
   },
   "devDependencies": {
