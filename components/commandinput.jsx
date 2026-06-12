@@ -63,8 +63,8 @@ export const CommandInput = () => {
     const handleSubmit = async () => {
         const rawCMD = value.trim().toLowerCase();
         const result = await runCommand(rawCMD);
-        await setError(result[0]);
-        await setResultColor(result[1]);
+        setError(result[0]);
+        setResultColor(result[1]);
         setValue('');
     };
 
