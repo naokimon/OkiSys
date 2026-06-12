@@ -25,7 +25,7 @@ export const SystemInfo = () => {
 
         si.memLayout().then(mem => {
             setRamInfo({
-                memory: (os.freemem() / 1e9).toFixed(1),
+                memory: (os.totalmem() / 1e9).toFixed(1),
                 type: mem[0].type,
                 speed: mem[0].clockSpeed,
                 slots: mem.length
