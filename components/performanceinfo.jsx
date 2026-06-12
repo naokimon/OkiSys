@@ -17,13 +17,13 @@ export const PerformanceInfo = () => {
                 setRamUsage((data.used / data.total * 100).toFixed(0));
             });
             si.currentLoad().then(data => setCpuUsage(data.currentLoad.toFixed(1)));
-            si.graphics().then(data => setGpuUsage(data.controllers[0].utilizationGpu));
+            si.graphics().then(data => setGpuUsage(data.controllers[0].utilizationGpu ?? 0));
         }, 5000);
 
         return () => clearInterval(refresh);
     });
 
-    const bar = (pct, width = 10) => {
+    const bar = (pct, width = 25) => {
         const filled = Math.round((pct / 100) * width);
         return "[" + "#".repeat(filled) + "-".repeat(width - filled) + "]";
     }
@@ -44,6 +44,18 @@ export const PerformanceInfo = () => {
                     <Text color={colors.textSecondary}>RAM Usage:</Text>
                     <Box>
                         <Text color={barColor(ramUsage)}>{bar(ramUsage)} {(ramUsage)}%</Text>
+                    </Box>
+                </Box>
+                <Box flexDirection="column" gap={1}>
+                    <Text color={colors.textSecondary}>CPU Usage:</Text>
+                    <Box>
+                        <Text color={barColor(cpuUsage)}>{bar(cpuUsage)} {(cpuUsage)}%</Text>
+                    </Box>
+                </Box>
+                <Box flexDirection="column" gap={1}>
+                    <Text color={colors.textSecondary}>GPU Usage:</Text>
+                    <Box>
+                        <Text color={barColor(gpuUsage)}>{bar(gpuUsage)} {(gpuUsage)}%</Text>
                     </Box>
                 </Box>
             </Box>
