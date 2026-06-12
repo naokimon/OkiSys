@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import os from "os";
 import si from "systeminformation";
 import { Box, Text } from "ink";
+import useSize from "../index";
 
 
 export const SystemInfo = () => {
@@ -37,8 +38,10 @@ export const SystemInfo = () => {
         }); // set storage
     }, []);
 
+    const size = useSize();
+
     return (
-        <Box flexDirection="column" paddingY={1} paddingX={2} minWidth={process.stdout.columns * 0.35}>
+        <Box flexDirection="column" paddingY={1} paddingX={2} minWidth={size.cols * 0.35}>
             <Box marginBottom={1} borderStyle="single" borderBottom={true} borderTop={false} borderLeft={false} borderRight={false} borderColor={colors.border}>
                 <Text bold color={colors.brand}>System Specs</Text>
             </Box>

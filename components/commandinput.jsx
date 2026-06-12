@@ -4,6 +4,7 @@ import { colors } from "../index";
 import TextInput from 'ink-text-input';
 import { Text, Box } from "ink";
 import open from 'open';
+import useSize from "../index";
 
 const runCommand = async (rawCMD) => {
     const i = rawCMD.indexOf(" ");
@@ -41,6 +42,11 @@ const runCommand = async (rawCMD) => {
                 return [res.status, colors.error];
                 break;
             }
+        case "refresh":
+            process.stdout.rows = process.stdout.rows;
+            process.stdout.columns = process.stdout.columns;
+            return [`Succesfully refreshed!`, colors.success];
+            break;
         default:
             return [`${cmd} is not a valid command!`, colors.textPrimary];
             break;
@@ -60,12 +66,14 @@ export const CommandInput = () => {
         setValue('');
     };
 
+    const size = useSize();
+
     return (
         <Box flexDirection="column">
             <Box paddingX={2}>
                 <Text color={resultColor}>{error}</Text>
             </Box>
-            <Box width={process.stdout.columns} borderStyle="round" borderColor={colors.border} paddingY={1.5} paddingX={2}>
+            <Box width={size.cols} borderStyle="round" borderColor={colors.border} paddingY={1.5} paddingX={2}>
                 <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={setValue} onSubmit={handleSubmit} placeholder="Enter a command..." />
             </Box>
         </Box>
