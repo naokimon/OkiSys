@@ -42,11 +42,6 @@ const runCommand = async (rawCMD) => {
                 return [res.status, colors.error];
                 break;
             }
-        case "refresh":
-            process.stdout.rows = process.stdout.rows;
-            process.stdout.columns = process.stdout.columns;
-            return [`Succesfully refreshed!`, colors.success];
-            break;
         default:
             return [`${cmd} is not a valid command!`, colors.textPrimary];
             break;

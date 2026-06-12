@@ -8,6 +8,7 @@ export const PerformanceInfo = () => {
     const [ramUsage, setRamUsage] = useState(null);
     const [cpuUsage, setCpuUsage] = useState(null);
     const [gpuUsage, setGpuUsage] = useState(null);
+    const refreshRate = 5000;
 
 
     useEffect(() => {
@@ -16,9 +17,9 @@ export const PerformanceInfo = () => {
                 if (!data) return;
                 setRamUsage((data.used / data.total * 100).toFixed(0));
             });
-            si.currentLoad().then(data => setCpuUsage(data.currentLoad.toFixed(1)));
+            si.currentLoad().then(data => setCpuUsage(data.currentLoad.toFixed(0)));
             si.graphics().then(data => setGpuUsage(data.controllers[0].utilizationGpu ?? 0));
-        }, 5000);
+        }, refreshRate);
 
         return () => clearInterval(refresh);
     });
@@ -55,7 +56,7 @@ export const PerformanceInfo = () => {
                 <Box flexDirection="column" gap={1}>
                     <Text color={colors.textSecondary}>GPU Usage:</Text>
                     <Box>
-                        <Text color={barColor(gpuUsage)}>{bar(gpuUsage)} {(gpuUsage)}%</Text>
+                        <Text color={barColor(gpuUsage)}>{bar(gpuUsage)} {gpuUsage}%</Text>
                     </Box>
                 </Box>
             </Box>

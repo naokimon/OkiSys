@@ -62,7 +62,7 @@ export const SystemInfo = () => {
                     { label: "Arch", value: os.arch() },
                 ].map(({ label, value }) => (
                     <Box key={label} width="100%" justifyContent="space-between">
-                        <Text color={colors.muted}>{label}</Text>
+                        <Text color={colors.muted}>{label}:</Text>
                         <Text color={colors.textPrimary}>{value}</Text>
                     </Box>
                 ))}
