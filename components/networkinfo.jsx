@@ -6,11 +6,11 @@ import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
 
 const formatSpeed = bytes => {
-    if (!bytes) return <Spinner type="dots" />;
+    if (bytes === null || bytes === undefined) return "...";
     if (bytes < 1024) return `${bytes.toFixed(1)} B/s`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB/s`;
     return `${(bytes / 1024 / 1024).toFixed(1)} MB/s`;
-}
+};
 
 export const NetworkInfo = () => {
     const [networkStats, setNetworkStats] = useState({ rx_sec: 0, tx_sec: 0 });
@@ -19,11 +19,15 @@ export const NetworkInfo = () => {
     const refreshRate = 5000;
 
     useEffect(() => {
-        si.networkInterfaces().then(data => setNetworkInterface(data[0]));
+        si.networkInterfaces().then(data => {
+            if (data?.[0]) setNetworkInterface(data[0]);
+        }).catch(() => {});
 
         const poll = () => {
-            si.networkStats().then(data => setNetworkStats(data[0]));
-            si.inetLatency().then(data => setLatency(data));
+            si.networkStats().then(data => {
+                if (data?.[0]) setNetworkStats(data[0]);
+            }).catch(() => {});
+            si.inetLatency().then(data => setLatency(data)).catch(() => {});
         };
         poll();
         const refresh = setInterval(poll, refreshRate);
@@ -40,15 +44,15 @@ export const NetworkInfo = () => {
                     <Text bold color={colors.brandLight}>Interface</Text>
                     <Box justifyContent="space-between" gap={2}>
                         <Text color={colors.textSecondary}>Name:</Text>
-                        {networkStats && <Text color={colors.textPrimary}>{networkStats.iface ?? <Spinner type="dots" />}</Text>}
+                        <Text color={colors.textPrimary}>{networkStats?.iface ?? <Spinner type="dots" />}</Text>
                     </Box>
                     <Box justifyContent="space-between" gap={2}>
                         <Text color={colors.textSecondary}>Type:</Text>
-                        {networkInterface && <Text color={colors.textPrimary}>{networkInterface.type}</Text>}
+                        <Text color={colors.textPrimary}>{networkInterface?.type ?? "..."}</Text>
                     </Box>
                     <Box justifyContent="space-between" gap={2}>
                         <Text color={colors.textSecondary}>IPv4:</Text>
-                        {networkInterface && <Text color={colors.textPrimary}>{networkInterface.ip4}</Text>}
+                        <Text color={colors.textPrimary}>{networkInterface?.ip4 ?? "..."}</Text>
                     </Box>
                     <Box justifyContent="space-between" gap={2}>
                         <Text color={colors.textSecondary}>Status:</Text>
@@ -62,11 +66,11 @@ export const NetworkInfo = () => {
                     <Text bold color={colors.brand}>Stats</Text>
                     <Box justifyContent="space-between" gap={2}>
                         <Text color={colors.textSecondary}>Download:</Text>
-                        {networkStats && <Text color={colors.textPrimary}>{formatSpeed(networkStats.rx_sec)}</Text>}
+                        <Text color={colors.textPrimary}>{formatSpeed(networkStats?.rx_sec)}</Text>
                     </Box>
                     <Box justifyContent="space-between" gap={2}>
                         <Text color={colors.textSecondary}>Upload:</Text>
-                        {networkStats && <Text color={colors.textPrimary}>{formatSpeed(networkStats.tx_sec)}</Text>}
+                        <Text color={colors.textPrimary}>{formatSpeed(networkStats?.tx_sec)}</Text>
                     </Box>
                 </Box>
 

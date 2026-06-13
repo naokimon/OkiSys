@@ -16,6 +16,7 @@ export const CommandList = () => {
                     { command: "github <user>", desc: "Open a GitHub user's profile" },
                     { command: "okisys", desc: "Open OkiSys repository on github" },
                     { command: "time", desc: "Get current time" },
+                    { command: "clear", desc: "Clear the output" },
                 ].map(({ command, desc }) => (
                     <Box key={command} width="100%" justifyContent="space-between" gap={1}>
                         <Text color={colors.muted}>{command}:</Text>

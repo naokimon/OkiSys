@@ -10,15 +10,21 @@ export const PerformanceInfo = () => {
     const [gpuUsage, setGpuUsage] = useState(null);
     const refreshRate = 5000;
 
-
     useEffect(() => {
         const poll = () => {
             si.mem().then(data => {
                 if (!data) return;
                 setRamUsage((data.used / data.total * 100).toFixed(0));
-            });
-            si.currentLoad().then(data => setCpuUsage(data.currentLoad.toFixed(0)));
-            si.graphics().then(data => setGpuUsage(data.controllers[0].utilizationGpu ?? 0));
+            }).catch(() => {});
+
+            si.currentLoad().then(data => {
+                if (!data) return;
+                setCpuUsage(data.currentLoad.toFixed(0));
+            }).catch(() => {});
+
+            si.graphics().then(data => {
+                setGpuUsage(data.controllers?.[0]?.utilizationGpu ?? 0);
+            }).catch(() => {});
         };
         poll();
         const refresh = setInterval(poll, refreshRate);
@@ -26,15 +32,17 @@ export const PerformanceInfo = () => {
     }, []);
 
     const bar = (pct, width = 25) => {
+        if (pct === null) return "[" + "-".repeat(width) + "]";
         const filled = Math.round((pct / 100) * width);
         return "[" + "#".repeat(filled) + "-".repeat(width - filled) + "]";
-    }
+    };
 
     const barColor = (pct) => {
+        if (pct === null) return colors.muted;
         if (pct >= 90) return colors.error;
         if (pct >= 60) return colors.warning;
         return colors.success;
-    }
+    };
 
     return (
         <Box flexDirection="column" paddingY={1} paddingX={2} flexGrow={1}>
@@ -45,19 +53,19 @@ export const PerformanceInfo = () => {
                 <Box flexDirection="column" gap={1}>
                     <Text color={colors.textSecondary}>RAM Usage:</Text>
                     <Box>
-                        <Text color={barColor(ramUsage)}>{bar(ramUsage)} {(ramUsage)}%</Text>
+                        <Text color={barColor(ramUsage)}>{bar(ramUsage)} {ramUsage ?? "..."}%</Text>
                     </Box>
                 </Box>
                 <Box flexDirection="column" gap={1}>
                     <Text color={colors.textSecondary}>CPU Usage:</Text>
                     <Box>
-                        <Text color={barColor(cpuUsage)}>{bar(cpuUsage)} {(cpuUsage)}%</Text>
+                        <Text color={barColor(cpuUsage)}>{bar(cpuUsage)} {cpuUsage ?? "..."}%</Text>
                     </Box>
                 </Box>
                 <Box flexDirection="column" gap={1}>
                     <Text color={colors.textSecondary}>GPU Usage:</Text>
                     <Box>
-                        <Text color={barColor(gpuUsage)}>{bar(gpuUsage)} {gpuUsage}%</Text>
+                        <Text color={barColor(gpuUsage)}>{bar(gpuUsage)} {gpuUsage ?? "..."}%</Text>
                     </Box>
                 </Box>
             </Box>

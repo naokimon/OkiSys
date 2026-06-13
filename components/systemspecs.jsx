@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import os from "os";
 import si from "systeminformation";
 import { Box, Text } from "ink";
+
 export const SystemInfo = () => {
     const cpus = os.cpus();
     const [storage, setStorage] = useState(null);
@@ -12,27 +13,31 @@ export const SystemInfo = () => {
 
     useEffect(() => {
         si.graphics().then(data => {
-            const controller = data.controllers[0];
+            const controller = data.controllers?.[0];
+            if (!controller) return;
             setGpu({
                 model: controller.model,
                 vram: (controller.vram / 1024).toFixed(1),
-                driver: controller.driverVersion === undefined ? "None" : controller.driverVersion,
+                driver: controller.driverVersion ?? "None",
             });
-        }, []); // set gpu dict
+        }).catch(() => {});
 
         si.memLayout().then(mem => {
+            if (!mem?.[0]) return;
             setRamInfo({
                 memory: (os.totalmem() / 1e9).toFixed(1),
                 type: mem[0].type,
                 speed: mem[0].clockSpeed,
                 slots: mem.length
-            }); // set ram dict
-        }, []);
+            });
+        }).catch(() => {});
 
         si.fsSize().then(drives => {
-            const cDrive = drives.find(d => d.fs === "C:");
-            setStorage(cDrive ? `${((cDrive.size - cDrive.used) / 1e9).toFixed(1)}/${(cDrive.size / 1e9).toFixed(1)} GB ` : "N/A");
-        }); // set storage
+            const isWindows = os.platform() === 'win32';
+            const rootFs = isWindows ? "C:" : "/";
+            const drive = drives.find(d => d.fs === rootFs) ?? drives[0];
+            setStorage(drive ? `${((drive.size - drive.used) / 1e9).toFixed(1)}/${(drive.size / 1e9).toFixed(1)} GB` : "N/A");
+        }).catch(() => {});
     }, []);
 
     return (
@@ -45,10 +50,10 @@ export const SystemInfo = () => {
                     { label: "CPU", value: cpus[0].model },
                     { label: "CPU Cores", value: `${cpus.length} cores` },
                     { label: "GPU", value: gpu?.model ?? "Loading..." },
-                    { label: "GPU VRAM", value: `${gpu?.vram} GB` ?? "Loading..." },
-                    { label: "GPU Driver", value: `${gpu?.driver}` ?? "Loading..." },
+                    { label: "GPU VRAM", value: gpu?.vram ? `${gpu.vram} GB` : "Loading..." },
+                    { label: "GPU Driver", value: gpu?.driver ?? "Loading..." },
                     { label: "Total RAM", value: `${ramInfo?.memory ?? "Loading..."} GB` },
-                    { label: "RAM Type", value: `${ramInfo?.type ?? "Loading..."}` },
+                    { label: "RAM Type", value: ramInfo?.type ?? "Loading..." },
                     { label: "RAM Speed", value: ramInfo ? `${ramInfo.speed} MHz` : "Loading..." },
                     { label: "RAM Slots", value: ramInfo ? `${ramInfo.slots} slots used` : "Loading..." },
                     { label: "Storage", value: storage ?? "Loading..." },
