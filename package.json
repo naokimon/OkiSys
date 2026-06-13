@@ -1,6 +1,6 @@
 {
   "name": "okisys",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A terminal system monitor and command launcher built with Ink",
   "main": "dist/okisys",
   "bin": {
