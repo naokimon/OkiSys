@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { colors } from "../index";
 import TextInput from 'ink-text-input';
-import { Text, Box, useInput } from "ink";
+import { Text, Box, useInput, useApp } from "ink";
 import open from 'open';
 import useSize from "../index";
 import { writeFileSync, existsSync, appendFileSync, readFileSync } from 'fs';
@@ -11,11 +11,11 @@ const runCommand = async (rawCMD) => {
     const i = rawCMD.indexOf(" ");
     const cmd = i === -1 ? rawCMD : rawCMD.slice(0, i);
     const args = i === -1 ? [] : rawCMD.slice(i + 1).split(" ");
-    
+    let clear = false;
+
     switch (cmd) {
         case "exit":
             process.exit(0);
-            break;
         case "goto":
             try {
                 let url = args[0];
@@ -24,28 +24,24 @@ const runCommand = async (rawCMD) => {
                 }
                 open(url);
                 return [`Trying ${url}`, colors.success];
-                break;
             } catch (e) {
                 return [e.message, colors.error];
-                break;
             }
         case "github":
             let username = args[0];
             const res = await fetch(`https://github.com/${username}`);
             if (res.status === 404) {
                 return [`${username} doesn't exist!`, colors.error];
-                break;
             } else if (res.status === 200) {
                 open(`https://github.com/${username}`);
                 return [`Opening ${username}'s profile!`, colors.success];
-                break;
             } else {
                 return [res.status, colors.error];
-                break;
             }
+        case "clear":
+            return ['', colors.success, true];
         default:
             return [`${cmd} is not a valid command!`, colors.textPrimary];
-            break;
     }
 };
 
@@ -53,6 +49,7 @@ export const CommandInput = () => {
     const [value, setValue] = useState('');
     const [error, setError] = useState();
     const [resultColor, setResultColor] = useState(null);
+    const [clear, setClear] = useState(false);
     const [commandList, setCommandList] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
@@ -80,6 +77,9 @@ export const CommandInput = () => {
         const result = await runCommand(rawCMD);
         setError(result[0]);
         setResultColor(result[1]);
+        if (result[2] !== null) {
+            setClear(result[2]);
+        }
         setValue('');
     };
 
@@ -101,7 +101,7 @@ export const CommandInput = () => {
 
     return (
         <Box width={size.cols} borderStyle="round" borderColor={colors.border} paddingY={1} paddingX={2} flexDirection="row" gap={2}>
-            {error && <Text color={resultColor}>{error}  |</Text>}
+            {error && !clear && <Text color={resultColor}>{error}  |</Text>}
             <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={(val) => {setValue(val), setHistoryIndex(commandList.length)}} onSubmit={handleSubmit} placeholder="Enter a command..." />
         </Box>
     )
