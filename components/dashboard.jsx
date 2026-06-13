@@ -10,7 +10,7 @@ import { NetworkInfo } from './networkinfo';
 import useSize from "../index";
 
 const Panel = ({ children }) => (
-    <Box flexShrink={0} borderStyle="round" borderColor={colors.border} alignSelf="stretch">
+    <Box flexGrow={1} borderStyle="round" borderColor={colors.border} alignSelf="stretch">
         {children}
     </Box>
 );
@@ -20,13 +20,13 @@ export const Dashboard = () => {
 
     return (
         <Box flexDirection="column" height={size.rows} width={size.cols}>
-            <Box flexDirection="column" gap={1}>
+            <Box flexDirection="column" flexGrow={1} gap={1}>
                 <Box flexDirection="row" gap={1}>
                     <Panel><SystemInfo /></Panel>
                     <Panel><PerformanceInfo /></Panel>
                     <Panel><CommandList /></Panel>
                 </Box>
-                <Box flexDirection="row" gap={1}>
+                <Box flexDirection="row" gap={1} flexGrow={1}>
                     <Panel><NetworkInfo /></Panel>
                 </Box>
             </Box>

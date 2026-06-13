@@ -3,7 +3,6 @@ import { colors } from "../index";
 import { useState, useEffect } from "react";
 import si from "systeminformation";
 import { Box, Text } from "ink";
-import useSize from "../index";
 import Spinner from "ink-spinner";
 
 const formatSpeed = bytes => {
@@ -31,10 +30,8 @@ export const NetworkInfo = () => {
         return () => clearInterval(refresh);
     }, []);
 
-    const size = useSize();
-
     return (
-        <Box flexDirection="column" paddingY={1} paddingX={2} minWidth={size.cols * 0.25}>
+        <Box flexDirection="column" paddingY={1} paddingX={2} flexGrow={1}>
             <Box marginBottom={1} borderStyle="single" borderBottom={true} borderTop={false} borderLeft={false} borderRight={false} borderColor={colors.border}>
                 <Text bold color={colors.brand}>Network Info</Text>
             </Box>

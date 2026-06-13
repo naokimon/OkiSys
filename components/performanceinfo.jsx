@@ -37,7 +37,7 @@ export const PerformanceInfo = () => {
     }
 
     return (
-        <Box flexDirection="column" paddingY={1} paddingX={2}>
+        <Box flexDirection="column" paddingY={1} paddingX={2} flexGrow={1}>
             <Box marginBottom={1} borderStyle="single" borderBottom={true} borderTop={false} borderLeft={false} borderRight={false} borderColor={colors.border}>
                 <Text bold color={colors.brand}>Performance Info</Text>
             </Box>
