@@ -9,7 +9,7 @@ import { writeFileSync, existsSync, appendFileSync, readFileSync } from 'fs';
 
 const runCommand = async (rawCMD) => {
     const i = rawCMD.indexOf(" ");
-    const cmd = i === -1 ? rawCMD : rawCMD.slice(0, i);
+    const cmd = i === -1 ? rawCMD : rawCMD.slice(0, i).toLowerCase();;
     const args = i === -1 ? [] : rawCMD.slice(i + 1).split(" ");
     let clear = false;
 
@@ -40,6 +40,18 @@ const runCommand = async (rawCMD) => {
             }
         case "clear":
             return ['', colors.success, true];
+        case "search":
+            let query = args[0];
+            for (let i = 1; i < args.length; i++) {
+                const queryPart = `%20${args[i]}`;
+                query += queryPart;
+            }
+            open(`https://www.google.com/search?q=${query}`);
+            return ["Searching!", colors.success];
+        case "time":
+            const date = new Date();
+            const hour = date.getHours() > 12 ? date.getHours() - 12 : date.getHours;
+            return [`It is now ${hour}:${date.getMinutes()} ${date.getHours() > 12 ? "PM" : "AM"}`, colors.success];
         default:
             return [`${cmd} is not a valid command!`, colors.textPrimary];
     }
@@ -62,7 +74,7 @@ export const CommandInput = () => {
     }, []);
 
     const handleSubmit = async () => {
-        const rawCMD = value.trim().toLowerCase();
+        const rawCMD = value.trim()
 
         if (!existsSync("commandlog.txt")) {
             writeFileSync('commandlog.txt', '');
