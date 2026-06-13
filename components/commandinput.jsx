@@ -6,6 +6,9 @@ import { Text, Box, useInput, useApp } from "ink";
 import open from 'open';
 import useSize from "../index";
 import { writeFileSync, existsSync, appendFileSync, readFileSync } from 'fs';
+import { homedir } from 'os';
+
+const HISTORY_FILE = `${homedir()}/.okisys_history`;
 
 const runCommand = async (rawCMD) => {
     const i = rawCMD.indexOf(" ");
@@ -77,8 +80,8 @@ export const CommandInput = () => {
     const [historyIndex, setHistoryIndex] = useState(0);
 
     useEffect(() => {
-        if (existsSync('commandlog.txt')) {
-            const lines = readFileSync('commandlog.txt', 'utf-8').split('\n').filter(Boolean);
+        if (existsSync(HISTORY_FILE)) {
+            const lines = readFileSync(HISTORY_FILE, 'utf-8').split('\n').filter(Boolean);
             setCommandList(lines);
             setHistoryIndex(lines.length);
         }
@@ -88,13 +91,13 @@ export const CommandInput = () => {
         const rawCMD = value.trim();
         if (!rawCMD) return;
 
-        if (!existsSync("commandlog.txt")) {
-            writeFileSync('commandlog.txt', rawCMD);
+        if (!existsSync(HISTORY_FILE)) {
+            writeFileSync(HISTORY_FILE, rawCMD);
         } else {
-            appendFileSync('commandlog.txt', `\n${rawCMD}`);
+            appendFileSync(HISTORY_FILE, `\n${rawCMD}`);
         }
 
-        const lines = readFileSync('commandlog.txt', 'utf-8').split('\n').filter(Boolean);
+        const lines = readFileSync(HISTORY_FILE, 'utf-8').split('\n').filter(Boolean);
         setCommandList(lines);
         setHistoryIndex(lines.length);
 

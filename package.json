@@ -1,15 +1,32 @@
 {
   "name": "okisys",
-  "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
-  "scripts": {
-    "test": "tsx index.jsx"
+  "version": "1.0.1",
+  "description": "A terminal system monitor and command launcher built with Ink",
+  "main": "dist/okisys",
+  "bin": {
+    "okisys": "dist/okisys"
   },
-  "keywords": [],
-  "author": "",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "tsx index.jsx",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "system-monitor",
+    "terminal",
+    "tui",
+    "ink",
+    "cli"
+  ],
+  "author": "naokimon",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "chalk": "^5.6.2",
     "chalk-animation": "^2.0.3",

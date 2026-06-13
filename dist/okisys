@@ -1,0 +1,358 @@
+#!/usr/bin/env node
+
+// index.jsx
+import React7 from "react";
+import { useState as useState6, useEffect as useEffect6 } from "react";
+import chalk from "chalk";
+import figlet from "figlet";
+import { render, Box as Box7, Text as Text6 } from "ink";
+import { useInput as useInput2 } from "ink";
+
+// components/dashboard.jsx
+import React6 from "react";
+import { useState as useState5, useEffect as useEffect5 } from "react";
+
+// components/performanceinfo.jsx
+import React from "react";
+import { useState, useEffect } from "react";
+import si from "systeminformation";
+import { Box, Text } from "ink";
+var PerformanceInfo = () => {
+  const [ramUsage, setRamUsage] = useState(null);
+  const [cpuUsage, setCpuUsage] = useState(null);
+  const [gpuUsage, setGpuUsage] = useState(null);
+  const refreshRate = 5e3;
+  useEffect(() => {
+    const poll = () => {
+      si.mem().then((data) => {
+        if (!data) return;
+        setRamUsage((data.used / data.total * 100).toFixed(0));
+      }).catch(() => {
+      });
+      si.currentLoad().then((data) => {
+        if (!data) return;
+        setCpuUsage(data.currentLoad.toFixed(0));
+      }).catch(() => {
+      });
+      si.graphics().then((data) => {
+        setGpuUsage(data.controllers?.[0]?.utilizationGpu ?? 0);
+      }).catch(() => {
+      });
+    };
+    poll();
+    const refresh = setInterval(poll, refreshRate);
+    return () => clearInterval(refresh);
+  }, []);
+  const bar = (pct, width = 25) => {
+    if (pct === null) return "[" + "-".repeat(width) + "]";
+    const filled = Math.round(pct / 100 * width);
+    return "[" + "#".repeat(filled) + "-".repeat(width - filled) + "]";
+  };
+  const barColor = (pct) => {
+    if (pct === null) return colors.muted;
+    if (pct >= 90) return colors.error;
+    if (pct >= 60) return colors.warning;
+    return colors.success;
+  };
+  return /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", paddingY: 1, paddingX: 2, flexGrow: 1 }, /* @__PURE__ */ React.createElement(Box, { marginBottom: 1, borderStyle: "single", borderBottom: true, borderTop: false, borderLeft: false, borderRight: false, borderColor: colors.border }, /* @__PURE__ */ React.createElement(Text, { bold: true, color: colors.brand }, "Performance Info")), /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React.createElement(Text, { color: colors.textSecondary }, "RAM Usage:"), /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { color: barColor(ramUsage) }, bar(ramUsage), " ", ramUsage ?? "...", "%"))), /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React.createElement(Text, { color: colors.textSecondary }, "CPU Usage:"), /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { color: barColor(cpuUsage) }, bar(cpuUsage), " ", cpuUsage ?? "...", "%"))), /* @__PURE__ */ React.createElement(Box, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React.createElement(Text, { color: colors.textSecondary }, "GPU Usage:"), /* @__PURE__ */ React.createElement(Box, null, /* @__PURE__ */ React.createElement(Text, { color: barColor(gpuUsage) }, bar(gpuUsage), " ", gpuUsage ?? "...", "%")))));
+};
+
+// components/systemspecs.jsx
+import React2 from "react";
+import { useState as useState2, useEffect as useEffect2 } from "react";
+import os from "os";
+import si2 from "systeminformation";
+import { Box as Box2, Text as Text2 } from "ink";
+var SystemInfo = () => {
+  const cpus = os.cpus();
+  const [storage, setStorage] = useState2(null);
+  const [ramInfo, setRamInfo] = useState2(null);
+  const [gpu, setGpu] = useState2(null);
+  useEffect2(() => {
+    si2.graphics().then((data) => {
+      const controller = data.controllers?.[0];
+      if (!controller) return;
+      setGpu({
+        model: controller.model,
+        vram: (controller.vram / 1024).toFixed(1),
+        driver: controller.driverVersion ?? "None"
+      });
+    }).catch(() => {
+    });
+    si2.memLayout().then((mem) => {
+      if (!mem?.[0]) return;
+      setRamInfo({
+        memory: (os.totalmem() / 1e9).toFixed(1),
+        type: mem[0].type,
+        speed: mem[0].clockSpeed,
+        slots: mem.length
+      });
+    }).catch(() => {
+    });
+    si2.fsSize().then((drives) => {
+      const isWindows = os.platform() === "win32";
+      const rootFs = isWindows ? "C:" : "/";
+      const drive = drives.find((d) => d.fs === rootFs) ?? drives[0];
+      setStorage(drive ? `${((drive.size - drive.used) / 1e9).toFixed(1)}/${(drive.size / 1e9).toFixed(1)} GB` : "N/A");
+    }).catch(() => {
+    });
+  }, []);
+  return /* @__PURE__ */ React2.createElement(Box2, { flexDirection: "column", paddingY: 1, paddingX: 2, flexGrow: 1 }, /* @__PURE__ */ React2.createElement(Box2, { marginBottom: 1, borderStyle: "single", borderBottom: true, borderTop: false, borderLeft: false, borderRight: false, borderColor: colors.border }, /* @__PURE__ */ React2.createElement(Text2, { bold: true, color: colors.brand }, "System Specs")), /* @__PURE__ */ React2.createElement(Box2, { flexDirection: "column", gap: 1 }, [
+    { label: "CPU", value: cpus[0].model },
+    { label: "CPU Cores", value: `${cpus.length} cores` },
+    { label: "GPU", value: gpu?.model ?? "Loading..." },
+    { label: "GPU VRAM", value: gpu?.vram ? `${gpu.vram} GB` : "Loading..." },
+    { label: "GPU Driver", value: gpu?.driver ?? "Loading..." },
+    { label: "Total RAM", value: `${ramInfo?.memory ?? "Loading..."} GB` },
+    { label: "RAM Type", value: ramInfo?.type ?? "Loading..." },
+    { label: "RAM Speed", value: ramInfo ? `${ramInfo.speed} MHz` : "Loading..." },
+    { label: "RAM Slots", value: ramInfo ? `${ramInfo.slots} slots used` : "Loading..." },
+    { label: "Storage", value: storage ?? "Loading..." },
+    { label: "OS", value: `${os.type()} ${os.release()}` },
+    { label: "Host", value: os.hostname() },
+    { label: "Arch", value: os.arch() }
+  ].map(({ label, value }) => /* @__PURE__ */ React2.createElement(Box2, { key: label, width: "100%", justifyContent: "space-between" }, /* @__PURE__ */ React2.createElement(Text2, { color: colors.muted }, label, ":"), /* @__PURE__ */ React2.createElement(Text2, { color: colors.textPrimary }, value)))));
+};
+
+// components/dashboard.jsx
+import { Box as Box6 } from "ink";
+
+// components/commandinput.jsx
+import React3 from "react";
+import { useState as useState3, useEffect as useEffect3 } from "react";
+import TextInput from "ink-text-input";
+import { Text as Text3, Box as Box3, useInput, useApp } from "ink";
+import open from "open";
+import { writeFileSync, existsSync, appendFileSync, readFileSync } from "fs";
+import { homedir } from "os";
+var HISTORY_FILE = `${homedir()}/.okisys_history`;
+var runCommand = async (rawCMD) => {
+  const i = rawCMD.indexOf(" ");
+  const cmd = i === -1 ? rawCMD : rawCMD.slice(0, i).toLowerCase();
+  const args = i === -1 ? [] : rawCMD.slice(i + 1).split(" ");
+  switch (cmd) {
+    case "exit":
+      process.exit(0);
+    case "goto": {
+      if (!args[0]) return ["Usage: goto <url>", colors.error];
+      try {
+        let url = args[0];
+        if (!url.includes("https://")) {
+          url = "https://" + url;
+        }
+        open(url);
+        return [`Trying ${url}`, colors.success];
+      } catch (e) {
+        return [e.message, colors.error];
+      }
+    }
+    case "github": {
+      if (!args[0]) return ["Usage: github <username>", colors.error];
+      const username = args[0];
+      try {
+        const res = await fetch(`https://github.com/${username}`);
+        if (res.status === 404) {
+          return [`${username} doesn't exist!`, colors.error];
+        } else if (res.status === 200) {
+          open(`https://github.com/${username}`);
+          return [`Opening ${username}'s profile!`, colors.success];
+        } else {
+          return [`Error checking GitHub profile (status ${res.status})`, colors.error];
+        }
+      } catch (e) {
+        return [`Network error: ${e.message}`, colors.error];
+      }
+    }
+    case "clear":
+      return ["", colors.success, true];
+    case "search": {
+      if (!args[0]) return ["Usage: search <query>", colors.error];
+      const query = args.map(encodeURIComponent).join("+");
+      open(`https://www.google.com/search?q=${query}`);
+      return ["Searching!", colors.success];
+    }
+    case "time": {
+      const date = /* @__PURE__ */ new Date();
+      const rawHour = date.getHours();
+      const hour = rawHour > 12 ? rawHour - 12 : rawHour === 0 ? 12 : rawHour;
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return [`It is now ${hour}:${minutes} ${rawHour >= 12 ? "PM" : "AM"}`, colors.success];
+    }
+    case "okisys":
+      open("https://github.com/naokimon/okisys");
+      return [`Opening OkiSys repository!`, colors.success];
+    default:
+      return [`${cmd} is not a valid command!`, colors.textPrimary];
+  }
+};
+var CommandInput = () => {
+  const [value, setValue] = useState3("");
+  const [error, setError] = useState3();
+  const [resultColor, setResultColor] = useState3(null);
+  const [clear, setClear] = useState3(false);
+  const [commandList, setCommandList] = useState3([]);
+  const [historyIndex, setHistoryIndex] = useState3(0);
+  useEffect3(() => {
+    if (existsSync(HISTORY_FILE)) {
+      const lines = readFileSync(HISTORY_FILE, "utf-8").split("\n").filter(Boolean);
+      setCommandList(lines);
+      setHistoryIndex(lines.length);
+    }
+  }, []);
+  const handleSubmit = async () => {
+    const rawCMD = value.trim();
+    if (!rawCMD) return;
+    if (!existsSync(HISTORY_FILE)) {
+      writeFileSync(HISTORY_FILE, rawCMD);
+    } else {
+      appendFileSync(HISTORY_FILE, `
+${rawCMD}`);
+    }
+    const lines = readFileSync(HISTORY_FILE, "utf-8").split("\n").filter(Boolean);
+    setCommandList(lines);
+    setHistoryIndex(lines.length);
+    const result = await runCommand(rawCMD);
+    setError(result[0]);
+    setResultColor(result[1]);
+    if (result[2] != null) {
+      setClear(result[2]);
+    }
+    setValue("");
+  };
+  useInput((input, key) => {
+    if (commandList.length === 0) return;
+    if (key.upArrow) {
+      const i = Math.max(0, historyIndex - 1);
+      setHistoryIndex(i);
+      setValue(commandList[i] ?? "");
+    } else if (key.downArrow) {
+      const i = Math.min(commandList.length - 1, historyIndex + 1);
+      setHistoryIndex(i);
+      setValue(commandList[i] ?? "");
+    }
+  });
+  const size = useSize();
+  return /* @__PURE__ */ React3.createElement(Box3, { width: size.cols, borderStyle: "round", borderColor: colors.border, paddingY: 1, paddingX: 2, flexDirection: "row", gap: 2 }, error && !clear && /* @__PURE__ */ React3.createElement(Text3, { color: resultColor }, error, "  |"), /* @__PURE__ */ React3.createElement(TextInput, { color: colors.textPrimary, placeholderColor: colors.muted, value, onChange: (val) => {
+    setValue(val);
+    setHistoryIndex(commandList.length);
+  }, onSubmit: handleSubmit, placeholder: "Enter a command..." }));
+};
+
+// components/commandlist.jsx
+import React4 from "react";
+import { Text as Text4, Box as Box4 } from "ink";
+var CommandList = () => {
+  return /* @__PURE__ */ React4.createElement(Box4, { flexDirection: "column", paddingY: 1, paddingX: 2, flexGrow: 1 }, /* @__PURE__ */ React4.createElement(Box4, { marginBottom: 1, borderStyle: "single", borderBottom: true, borderTop: false, borderLeft: false, borderRight: false, borderColor: colors.border }, /* @__PURE__ */ React4.createElement(Text4, { bold: true, color: colors.brand }, "Command List")), /* @__PURE__ */ React4.createElement(Box4, { flexDirection: "column", gap: 1 }, [
+    { command: "exit", desc: "Exit the program" },
+    { command: "goto <url>", desc: "Open a URL in your browser" },
+    { command: "search <query>", desc: "Search the query in your browser" },
+    { command: "github <user>", desc: "Open a GitHub user's profile" },
+    { command: "okisys", desc: "Open OkiSys repository on github" },
+    { command: "time", desc: "Get current time" },
+    { command: "clear", desc: "Clear the output" }
+  ].map(({ command, desc }) => /* @__PURE__ */ React4.createElement(Box4, { key: command, width: "100%", justifyContent: "space-between", gap: 1 }, /* @__PURE__ */ React4.createElement(Text4, { color: colors.muted }, command, ":"), /* @__PURE__ */ React4.createElement(Text4, { color: colors.textPrimary }, desc)))));
+};
+
+// components/networkinfo.jsx
+import React5 from "react";
+import { useState as useState4, useEffect as useEffect4 } from "react";
+import si3 from "systeminformation";
+import { Box as Box5, Text as Text5 } from "ink";
+import Spinner from "ink-spinner";
+var formatSpeed = (bytes) => {
+  if (bytes === null || bytes === void 0) return "...";
+  if (bytes < 1024) return `${bytes.toFixed(1)} B/s`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB/s`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB/s`;
+};
+var NetworkInfo = () => {
+  const [networkStats, setNetworkStats] = useState4({ rx_sec: 0, tx_sec: 0 });
+  const [networkInterface, setNetworkInterface] = useState4(null);
+  const [latency, setLatency] = useState4(null);
+  const refreshRate = 5e3;
+  useEffect4(() => {
+    si3.networkInterfaces().then((data) => {
+      if (data?.[0]) setNetworkInterface(data[0]);
+    }).catch(() => {
+    });
+    const poll = () => {
+      si3.networkStats().then((data) => {
+        if (data?.[0]) setNetworkStats(data[0]);
+      }).catch(() => {
+      });
+      si3.inetLatency().then((data) => setLatency(data)).catch(() => {
+      });
+    };
+    poll();
+    const refresh = setInterval(poll, refreshRate);
+    return () => clearInterval(refresh);
+  }, []);
+  return /* @__PURE__ */ React5.createElement(Box5, { flexDirection: "column", paddingY: 1, paddingX: 2, flexGrow: 1 }, /* @__PURE__ */ React5.createElement(Box5, { marginBottom: 1, borderStyle: "single", borderBottom: true, borderTop: false, borderLeft: false, borderRight: false, borderColor: colors.border }, /* @__PURE__ */ React5.createElement(Text5, { bold: true, color: colors.brand }, "Network Info")), /* @__PURE__ */ React5.createElement(Box5, { flexDirection: "row", gap: 6 }, /* @__PURE__ */ React5.createElement(Box5, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React5.createElement(Text5, { bold: true, color: colors.brandLight }, "Interface"), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textSecondary }, "Name:"), /* @__PURE__ */ React5.createElement(Text5, { color: colors.textPrimary }, networkStats?.iface ?? /* @__PURE__ */ React5.createElement(Spinner, { type: "dots" }))), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textSecondary }, "Type:"), /* @__PURE__ */ React5.createElement(Text5, { color: colors.textPrimary }, networkInterface?.type ?? "...")), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textSecondary }, "IPv4:"), /* @__PURE__ */ React5.createElement(Text5, { color: colors.textPrimary }, networkInterface?.ip4 ?? "...")), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textSecondary }, "Status:"), /* @__PURE__ */ React5.createElement(Text5, { backgroundColor: networkInterface === null ? colors.warning : networkInterface.operstate === "up" ? colors.success : colors.error }, "  "))), /* @__PURE__ */ React5.createElement(Box5, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React5.createElement(Text5, { bold: true, color: colors.brand }, "Stats"), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textSecondary }, "Download:"), /* @__PURE__ */ React5.createElement(Text5, { color: colors.textPrimary }, formatSpeed(networkStats?.rx_sec))), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textSecondary }, "Upload:"), /* @__PURE__ */ React5.createElement(Text5, { color: colors.textPrimary }, formatSpeed(networkStats?.tx_sec)))), /* @__PURE__ */ React5.createElement(Box5, { flexDirection: "column", gap: 1 }, /* @__PURE__ */ React5.createElement(Text5, { bold: true, color: colors.brand }, "Ping"), /* @__PURE__ */ React5.createElement(Box5, { justifyContent: "space-between", gap: 2 }, /* @__PURE__ */ React5.createElement(Text5, { color: colors.textPrimary }, latency === null ? /* @__PURE__ */ React5.createElement(Spinner, { type: "dots" }) : `${latency}ms`)))));
+};
+
+// components/dashboard.jsx
+var Panel = ({ children }) => /* @__PURE__ */ React6.createElement(Box6, { flexGrow: 1, borderStyle: "round", borderColor: colors.border, alignSelf: "stretch" }, children);
+var Dashboard = () => {
+  const size = useSize();
+  return /* @__PURE__ */ React6.createElement(Box6, { flexDirection: "column", height: size.rows, width: size.cols }, /* @__PURE__ */ React6.createElement(Box6, { flexDirection: "column", flexGrow: 1, gap: 1 }, /* @__PURE__ */ React6.createElement(Box6, { flexDirection: "row", gap: 1 }, /* @__PURE__ */ React6.createElement(Panel, null, /* @__PURE__ */ React6.createElement(SystemInfo, null)), /* @__PURE__ */ React6.createElement(Panel, null, /* @__PURE__ */ React6.createElement(PerformanceInfo, null)), /* @__PURE__ */ React6.createElement(Panel, null, /* @__PURE__ */ React6.createElement(CommandList, null))), /* @__PURE__ */ React6.createElement(Box6, { flexDirection: "row", gap: 1, flexGrow: 1 }, /* @__PURE__ */ React6.createElement(Panel, null, /* @__PURE__ */ React6.createElement(NetworkInfo, null)))), /* @__PURE__ */ React6.createElement(CommandInput, null));
+};
+
+// index.jsx
+var banner = figlet.textSync("OkiSys", { font: "ANSI Shadow" });
+var colors = {
+  brand: "#a855f7",
+  // vivid purple
+  brandLight: "#c084fc",
+  // light purple
+  brandDark: "#7e22ce",
+  // deep purple
+  bg: "#0d0d0f",
+  surface: "#13111a",
+  // dark purple tint
+  border: "#4c1d95",
+  // deep purple border
+  muted: "#6b5f7a",
+  // purple-grey
+  textPrimary: "#fef08a",
+  // soft yellow
+  textSecondary: "#ca8a04",
+  // amber yellow
+  success: "#84cc16",
+  // lime green
+  warning: "#facc15",
+  // vivid yellow
+  error: "#f43f5e",
+  // rose red
+  info: "#a78bfa"
+  // soft purple
+};
+function useSize() {
+  const [size, setSize] = useState6({
+    rows: process.stdout.rows,
+    cols: process.stdout.columns
+  });
+  useEffect6(() => {
+    const onResize = () => setSize({
+      rows: process.stdout.rows,
+      cols: process.stdout.columns
+    });
+    process.stdout.on("resize", onResize);
+    return () => process.stdout.off("resize", onResize);
+  }, []);
+  return size;
+}
+var StartUp = ({ onDone }) => {
+  useInput2(() => onDone());
+  console.clear();
+  const size = useSize();
+  return /* @__PURE__ */ React7.createElement(Box7, { flexDirection: "column" }, /* @__PURE__ */ React7.createElement(Box7, { height: size.rows * 0.9, width: size.cols, justifyContent: "center", alignItems: "center" }, /* @__PURE__ */ React7.createElement(Box7, { justifyContent: "center", alignItems: "center", width: "50%", flexDirection: "column", padding: 5, borderStyle: "round", borderColor: colors.border }, /* @__PURE__ */ React7.createElement(Text6, { color: colors.brand }, banner), /* @__PURE__ */ React7.createElement(Text6, { dimColor: true }, "Built by naokimon"))), /* @__PURE__ */ React7.createElement(Box7, { height: size.rows * 0.1, width: size.cols, justifyContent: "center" }, /* @__PURE__ */ React7.createElement(Text6, { dimColor: true }, "Press any key to continue...")));
+};
+var App = () => {
+  const [screen, setScreen] = useState6("startup");
+  return screen === "startup" ? /* @__PURE__ */ React7.createElement(StartUp, { onDone: () => setScreen("dashboard") }) : /* @__PURE__ */ React7.createElement(Dashboard, null);
+};
+render(/* @__PURE__ */ React7.createElement(App, null));
+export {
+  colors,
+  useSize as default
+};
