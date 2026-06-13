@@ -56,6 +56,14 @@ export const CommandInput = () => {
     const [commandList, setCommandList] = useState([]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
+    useEffect(() => {
+        if (existsSync('commandlog.txt')) {
+            const lines = readFileSync('commandlog.txt', 'utf-8').split('\n').filter(Boolean);
+            setCommandList(lines);
+            setHistoryIndex(lines.length);
+        }
+    }, []);
+
     const handleSubmit = async () => {
         const rawCMD = value.trim().toLowerCase();
 
@@ -94,7 +102,7 @@ export const CommandInput = () => {
     return (
         <Box width={size.cols} borderStyle="round" borderColor={colors.border} paddingY={1} paddingX={2} flexDirection="row" gap={2}>
             {error && <Text color={resultColor}>{error}  |</Text>}
-            <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={setValue} onSubmit={handleSubmit} placeholder="Enter a command..." />
+            <TextInput color={colors.textPrimary} placeholderColor={colors.muted} value={value} onChange={(val) => {setValue(val), setHistoryIndex(commandList.length)}} onSubmit={handleSubmit} placeholder="Enter a command..." />
         </Box>
     )
 };
