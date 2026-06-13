@@ -6,7 +6,7 @@ import { Box, Text } from "ink";
 import Spinner from "ink-spinner";
 
 const formatSpeed = bytes => {
-    if (!bytes) return <Spinner type="dots"/>;
+    if (!bytes) return <Spinner type="dots" />;
     if (bytes < 1024) return `${bytes.toFixed(1)} B/s`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB/s`;
     return `${(bytes / 1024 / 1024).toFixed(1)} MB/s`;
@@ -35,23 +35,45 @@ export const NetworkInfo = () => {
             <Box marginBottom={1} borderStyle="single" borderBottom={true} borderTop={false} borderLeft={false} borderRight={false} borderColor={colors.border}>
                 <Text bold color={colors.brand}>Network Info</Text>
             </Box>
-            <Box flexDirection="column" gap={1}>
-                <Box justifyContent="space-between">
-                    <Text color={colors.textSecondary}>Interface Name:</Text>
-                    <Box>
+            <Box flexDirection="row" gap={6}>
+                <Box flexDirection="column" gap={1}>
+                    <Text bold color={colors.brandLight}>Interface</Text>
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textSecondary}>Name:</Text>
                         {networkStats && <Text color={colors.textPrimary}>{networkStats.iface ?? <Spinner type="dots" />}</Text>}
                     </Box>
-                </Box>
-                <Box justifyContent="space-between">
-                    <Text color={colors.textSecondary}>Download Speed:</Text>
-                    <Box>
-                        {networkStats && <Text color={colors.textPrimary}>{formatSpeed(networkStats.rx_sec)}</Text>}
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textSecondary}>Type:</Text>
+                        {networkInterface && <Text color={colors.textPrimary}>{networkInterface.type}</Text>}
+                    </Box>
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textSecondary}>IPv4:</Text>
+                        {networkInterface && <Text color={colors.textPrimary}>{networkInterface.ip4}</Text>}
+                    </Box>
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textSecondary}>Status:</Text>
+                        <Text backgroundColor={networkInterface === null ? colors.warning : (networkInterface.operstate === 'up' ? colors.success : colors.error)}>
+                            {"  "}
+                        </Text>
                     </Box>
                 </Box>
-                <Box justifyContent="space-between">
-                    <Text color={colors.textSecondary}>Upload Speed:</Text>
-                    <Box>
+
+                <Box flexDirection="column" gap={1}>
+                    <Text bold color={colors.brand}>Stats</Text>
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textSecondary}>Download:</Text>
+                        {networkStats && <Text color={colors.textPrimary}>{formatSpeed(networkStats.rx_sec)}</Text>}
+                    </Box>
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textSecondary}>Upload:</Text>
                         {networkStats && <Text color={colors.textPrimary}>{formatSpeed(networkStats.tx_sec)}</Text>}
+                    </Box>
+                </Box>
+
+                <Box flexDirection="column" gap={1}>
+                    <Text bold color={colors.brand}>Ping</Text>
+                    <Box justifyContent="space-between" gap={2}>
+                        <Text color={colors.textPrimary}>{latency === null ? <Spinner type="dots"/> : `${latency}ms`}</Text>
                     </Box>
                 </Box>
             </Box>
