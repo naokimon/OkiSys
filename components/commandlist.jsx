@@ -12,8 +12,9 @@ export const CommandList = () => {
                 {[
                     { command: "exit", desc: "Exit the program" },
                     { command: "goto <url>", desc: "Open a URL in your browser" },
-                    { command: "search <query>", desc: "Search in your browser" },
+                    { command: "search <query>", desc: "Search the query in your browser" },
                     { command: "github <user>", desc: "Open a GitHub user's profile" },
+                    { command: "okisys", desc: "Open OkiSys repository on github" },
                     { command: "time", desc: "Get current time" },
                 ].map(({ command, desc }) => (
                     <Box key={command} width="100%" justifyContent="space-between" gap={1}>

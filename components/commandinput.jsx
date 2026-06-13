@@ -52,6 +52,9 @@ const runCommand = async (rawCMD) => {
             const date = new Date();
             const hour = date.getHours() > 12 ? date.getHours() - 12 : date.getHours;
             return [`It is now ${hour}:${date.getMinutes()} ${date.getHours() > 12 ? "PM" : "AM"}`, colors.success];
+        case "okisys":
+            open("https://github.com/naokimon/okisys");
+            return [`Opening OkiSys repository!`, colors.success];
         default:
             return [`${cmd} is not a valid command!`, colors.textPrimary];
     }

@@ -16,8 +16,11 @@ A terminal-based system dashboard built with [Ink](https://github.com/vadimdemed
 | Command | Description |
 |---|---|
 | `goto <url>` | Open a URL in your browser |
+| `search <query>` | Search the query in your browser |
 | `github <username>` | Open a GitHub profile |
 | `exit` | Quit |
+| `okisys` | Open OkiSys repository on github |
+| `time` | Get current time |
 
 Use the up/down arrow keys to cycle through command history.
 
