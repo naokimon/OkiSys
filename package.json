@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.28.0",
+    "eslint": "^10.5.0",
     "tsx": "^4.22.4"
   }
 }
